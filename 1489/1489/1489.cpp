@@ -44,10 +44,8 @@ public:
 private:
 	int kruskal(int n, const vector<vector<int>>& edges, const vector<pair<int, int>>& orderedEdges, int removedEdgeIndex, int initialUseEdgeIndex) {
 		vector<int> parents(n);
-		vector<int> depths(n);
 		for (int i = 0; i < n; i++) {
 			parents[i] = i;
-			depths[i] = 1;
 		}
 
 		int numGroups = n;
@@ -59,7 +57,7 @@ private:
 			const int& d = edges[initialUseEdgeIndex][2];
 
 			mstSize += d;
-			merge(parents, depths, u, v, u, v);
+			merge(parents, u, v);
 			numGroups--;
 		}
 
@@ -78,7 +76,7 @@ private:
 			mstSize += d;
 
 			// Merge root_u and root_v
-			merge(parents, depths, root_u, root_v, u, v);
+			merge(parents, root_u, root_v);
 			numGroups--;
 		}
 
@@ -89,10 +87,8 @@ private:
 		}
 	}
 
-	void merge(vector<int>& parents, vector<int>& depths, int root_u, int root_v, int u, int v) {
-		if (depths[root_u] < depths[root_v]) swap(root_u, root_v);
+	void merge(vector<int>& parents, int root_u, int root_v) {
 		parents[root_v] = root_u;
-		depths[root_v] = 0;
 	}
 
 	int getRoot(vector<int>& parents, int u) {
