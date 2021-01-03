@@ -10,30 +10,26 @@ using namespace std;
 class Solution {
 public:
 	vector<vector<int>> findCriticalAndPseudoCriticalEdges(int n, vector<vector<int>>& edges) {
-		// Sort the edges
-		vector<pair<int, int>> orderedEdges;
 		for (int i = 0; i < edges.size(); i++) {
-			const auto& d = edges[i][2];
-			orderedEdges.push_back({ d, i });
+			edges[i].push_back(i);
 		}
-		sort(orderedEdges.begin(), orderedEdges.end());
 
-		int best = kruskal(n, edges, orderedEdges, -1, -1);
+		// Sort the edges
+		sort(edges.begin(), edges.end(), [](const auto& v1, const auto& v2) {
+			return v1[2] < v2[2];
+		});
+
+		int best = kruskal(n, edges, -1, -1);
 
 		vector<vector<int>> ans(2);
 		for (int i = 0; i < edges.size(); i++) {
-			vector<int> parents(n, -1);
-			vector<int> depths(n, 1);
-
 			// Run kruskal excluding this edge
-			int size = kruskal(n, edges, orderedEdges, i, -1);
-			if (size > best) {
-				ans[0].push_back(i);
+			if (kruskal(n, edges, i, -1) > best) {
+				ans[0].push_back(edges[i][3]);
 			} else {
 				// Run kruskal using this edge
-				int size = kruskal(n, edges, orderedEdges, -1, i);
-				if (size == best) {
-					ans[1].push_back(i);
+				if (kruskal(n, edges, -1, i) == best) {
+					ans[1].push_back(edges[i][3]);
 				}
 			}
 		}
@@ -42,7 +38,7 @@ public:
 	}
 
 private:
-	int kruskal(int n, const vector<vector<int>>& edges, const vector<pair<int, int>>& orderedEdges, int removedEdgeIndex, int initialUseEdgeIndex) {
+	int kruskal(int n, const vector<vector<int>>& edges, int removedEdgeIndex, int initialUseEdgeIndex) {
 		vector<int> parents(n);
 		for (int i = 0; i < n; i++) {
 			parents[i] = i;
@@ -61,13 +57,12 @@ private:
 			numGroups--;
 		}
 
-		for (const auto& p : orderedEdges) {
-			const int& d = p.first;
-			const int& edgeIndex = p.second;
-			if (edgeIndex == removedEdgeIndex) continue;
+		for (int i = 0; i < edges.size(); i++) {
+			if (i == removedEdgeIndex || i == initialUseEdgeIndex) continue;
 
-			const int& u = edges[edgeIndex][0];
-			const int& v = edges[edgeIndex][1];
+			const int& u = edges[i][0];
+			const int& v = edges[i][1];
+			const int& d = edges[i][2];
 
 			int root_u = getRoot(parents, u);
 			int root_v = getRoot(parents, v);
